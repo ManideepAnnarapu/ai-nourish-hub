@@ -124,10 +124,10 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
     }
 
     try {
-      // First, verify the meal plan exists
+      // Get the meal plan to get the week_start_date
       const { data: mealPlan, error: mealPlanError } = await supabase
         .from('meal_plans')
-        .select('id')
+        .select('week_start_date')
         .eq('id', mealPlanId)
         .single();
 
@@ -135,17 +135,22 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
         throw new Error('The associated meal plan could not be found.');
       }
 
-      const ingredients = meal.ingredients.map((ingredient: string) => ({
-        user_id: user?.id,
-        meal_plan_id: mealPlanId,
-        item_name: ingredient,
-        quantity: '1 unit',
-        is_purchased: false
-      }));
+      if (!mealPlan.week_start_date) {
+        throw new Error('Meal plan is missing week start date.');
+      }
 
+      // Insert each ingredient as a separate grocery list item
       const { error } = await supabase
         .from('grocery_lists')
-        .insert(ingredients);
+        .insert(
+          meal.ingredients.map((ingredient: string) => ({
+            user_id: user?.id,
+            week_start_date: mealPlan.week_start_date,
+            item_name: ingredient,
+            quantity: '1 unit',
+            is_purchased: false
+          }))
+        );
 
       if (error) throw error;
 
@@ -160,7 +165,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
         description: error.message || 'Failed to add ingredients to grocery list.',
         variant: 'destructive',
       });
-    }  
+    }
   };
 
   const getYouTubeSearchUrl = (mealName: string) => {
