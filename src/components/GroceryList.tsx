@@ -21,38 +21,78 @@ export const GroceryList = () => {
   const { toast } = useToast();
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [availableWeeks, setAvailableWeeks] = useState<string[]>([]);
-  const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
-      fetchAvailableWeeks();
+      loadCurrentWeekGroceryItems();
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user && selectedWeek) {
-      loadGroceryItems(selectedWeek);
-    }
-  }, [user, selectedWeek]);
+  // Helper to get current week's start and end dates (Monday to Sunday)
+  const getCurrentWeekRange = () => {
+    const now = new Date();
+    const day = now.getDay();
+    // Monday as start of week
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() + diffToMonday);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+    return { weekStart, weekEnd };
+  };
 
-  // Fetch all meal plans for the user and set available weeks
-  const fetchAvailableWeeks = async () => {
+  // Load grocery items only if a meal plan was created this week
+  const loadCurrentWeekGroceryItems = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // 1. Find meal plan created in current week
+      const { weekStart, weekEnd } = getCurrentWeekRange();
+      const { data: mealPlans, error: mealPlanError } = await supabase
         .from('meal_plans')
-        .select('week_start_date')
+        .select('id, created_at, week_start_date')
         .eq('user_id', user.id)
-        .order('week_start_date', { ascending: false });
-      if (error) throw error;
-      const weeks = (data || []).map(mp => mp.week_start_date);
-      setAvailableWeeks(weeks);
-      if (weeks.length > 0) {
-        setSelectedWeek(weeks[0]); // default to most recent
-      } else {
-        setSelectedWeek(null);
+        .order('created_at', { ascending: false });
+      if (mealPlanError) throw mealPlanError;
+      const thisWeekPlan = (mealPlans || []).find(mp => {
+        const created = new Date(mp.created_at);
+        return created >= weekStart && created <= weekEnd;
+      });
+      if (!thisWeekPlan) {
+        setGroceryItems([]);
+        setLoading(false);
+        return;
       }
+      // 2. Fetch grocery items for that meal plan's week_start_date
+      const { data, error } = await supabase
+        .from('grocery_lists')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('week_start_date', thisWeekPlan.week_start_date)
+        .order('item_name', { ascending: true });
+      if (error) throw error;
+      // Group by item name and combine quantities
+      const groupedItems = (data || []).reduce((acc: Record<string, GroceryItem>, item) => {
+        const key = item.item_name.toLowerCase();
+        if (acc[key]) {
+          const quantities = acc[key].quantity.split(', ');
+          if (!quantities.includes(item.quantity)) {
+            quantities.push(item.quantity);
+          }
+          acc[key].quantity = quantities.join(', ');
+        } else {
+          acc[key] = {
+            id: item.id,
+            item_name: item.item_name,
+            quantity: item.quantity || '1 unit',
+            is_purchased: item.is_purchased,
+            notes: item.notes,
+          };
+        }
+        return acc;
+      }, {});
+      setGroceryItems(Object.values(groupedItems));
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -63,9 +103,6 @@ export const GroceryList = () => {
       setLoading(false);
     }
   };
-
-  // Load grocery items for the selected week
-  const loadGroceryItems = async (weekStartDate: string) => {
     if (!user) return;
 
     try {
@@ -208,19 +245,6 @@ export const GroceryList = () => {
           </p>
         </div>
         <div className="flex gap-2 items-center">
-          {availableWeeks.length > 0 && (
-            <select
-              value={selectedWeek || ''}
-              onChange={e => setSelectedWeek(e.target.value)}
-              className="border rounded px-2 py-1 text-sm"
-            >
-              {availableWeeks.map(week => (
-                <option key={week} value={week}>
-                  {new Date(week).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                </option>
-              ))}
-            </select>
-          )}
           <Button variant="outline" onClick={searchNearbyStores}>
             <MapPin className="h-4 w-4 mr-2" />
             Find Stores
