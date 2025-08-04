@@ -30,20 +30,36 @@ export const GroceryList = () => {
     if (!user) return;
 
     try {
+      // First, get the current week's start date (Sunday)
+      const today = new Date();
+      const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const daysSinceSunday = dayOfWeek === 0 ? 0 : -dayOfWeek; // If today is Sunday, use today
+      const sunday = new Date(today);
+      sunday.setDate(today.getDate() + daysSinceSunday);
+      sunday.setHours(0, 0, 0, 0);
+      
+      const weekStartDate = sunday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      
+      // Query for items from the current week
       const { data, error } = await supabase
         .from('grocery_lists')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('week_start_date', weekStartDate)
+        .order('item_name', { ascending: true });
 
       if (error) throw error;
 
-      // Group by item name and sum quantities
+      // Group by item name and combine quantities
       const groupedItems = data.reduce((acc: Record<string, GroceryItem>, item) => {
         const key = item.item_name.toLowerCase();
         if (acc[key]) {
-          // If item already exists, combine quantities (simplified)
-          acc[key].quantity = `${acc[key].quantity}, ${item.quantity}`;
+          // If item already exists, combine quantities
+          const quantities = acc[key].quantity.split(', ');
+          if (!quantities.includes(item.quantity)) {
+            quantities.push(item.quantity);
+          }
+          acc[key].quantity = quantities.join(', ');
         } else {
           acc[key] = {
             id: item.id,

@@ -32,20 +32,41 @@ export const Dashboard = () => {
   }, [user]);
 
   const checkUserProfile = async () => {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('user_id', user?.id)
-      .single();
+    try {
+      const [
+        { data: profile },
+        { data: preferences }
+      ] = await Promise.all([
+        supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user?.id)
+          .single(),
+        supabase
+          .from('diet_preferences')
+          .select('*')
+          .eq('user_id', user?.id)
+          .single()
+      ]);
 
-    const { data: preferences } = await supabase
-      .from('diet_preferences')
-      .select('*')
-      .eq('user_id', user?.id)
-      .single();
-
-    setHasProfile(Boolean(profile?.full_name && preferences?.diet_type));
-    setLoading(false);
+      const isProfileComplete = Boolean(profile?.full_name && preferences?.diet_type);
+      setHasProfile(isProfileComplete);
+      
+      // If profile is complete, switch to meal plan tab
+      if (isProfileComplete) {
+        localStorage.setItem('profileComplete', 'true');
+        setActiveTab('meal-plan');
+      } else {
+        localStorage.removeItem('profileComplete');
+        setActiveTab('profile');
+      }
+    } catch (error) {
+      console.error('Error checking user profile:', error);
+      setHasProfile(false);
+      setActiveTab('profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadCurrentMealPlan = async () => {
@@ -64,13 +85,13 @@ export const Dashboard = () => {
     await supabase.auth.signOut();
   };
 
-  const handleProfileComplete = () => {
-    setHasProfile(true);
-    setActiveTab('meal-plan');
-    localStorage.setItem('profileComplete', 'true');
+  const handleProfileComplete = async () => {
+    // Refresh the profile data to ensure we have the latest state
+    await checkUserProfile();
+    
     toast({
-      title: 'Profile completed!',
-      description: 'You can now generate your meal plan.',
+      title: 'Profile updated!',
+      description: 'Your profile has been saved successfully.',
     });
   };
 
