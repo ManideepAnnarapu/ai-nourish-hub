@@ -12,7 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, getYear, setYear, setMonth } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,6 +25,8 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState<Date>();
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
 
   // Profile data
   const [profileData, setProfileData] = useState({
@@ -221,12 +223,73 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={dateOfBirth}
-                      onSelect={setDateOfBirth}
-                      initialFocus
-                    />
+                    <div className="p-3">
+                      <div className="flex justify-between items-center mb-4">
+                        <Select
+                          value={selectedMonth.toString()}
+                          onValueChange={(value) => {
+                            const month = parseInt(value);
+                            setSelectedMonth(month);
+                            if (dateOfBirth) {
+                              setDateOfBirth(setMonth(dateOfBirth, month));
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Month" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 12 }).map((_, i) => (
+                              <SelectItem key={i} value={i.toString()}>
+                                {new Date(0, i).toLocaleString(undefined, { month: 'long' })}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select
+                          value={selectedYear.toString()}
+                          onValueChange={(value) => {
+                            const year = parseInt(value);
+                            setSelectedYear(year);
+                            if (dateOfBirth) {
+                              setDateOfBirth(setYear(dateOfBirth, year));
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[100px] ml-2">
+                            <SelectValue placeholder="Year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 100 }, (_, i) => {
+                              const year = new Date().getFullYear() - i;
+                              return (
+                                <SelectItem key={year} value={year.toString()}>
+                                  {year}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Calendar
+                        mode="single"
+                        selected={dateOfBirth}
+                        onSelect={(date) => {
+                          if (date) {
+                            setDateOfBirth(date);
+                            setSelectedYear(getYear(date));
+                            setSelectedMonth(date.getMonth());
+                          }
+                        }}
+                        month={new Date(selectedYear, selectedMonth)}
+                        onMonthChange={(date) => {
+                          setSelectedYear(getYear(date));
+                          setSelectedMonth(date.getMonth());
+                        }}
+                        initialFocus
+                        className="p-0"
+                      />
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
