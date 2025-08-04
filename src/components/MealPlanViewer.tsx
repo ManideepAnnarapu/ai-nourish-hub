@@ -104,7 +104,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
     }
   };
 
-  const addIngredientsToGroceryList = async (meal: any, mealPlanId: string) => {
+  const addIngredientsToGroceryList = async (meal: any, mealPlanId: string | undefined) => {
     if (!meal.ingredients || meal.ingredients.length === 0) {
       toast({
         title: 'No ingredients',
@@ -114,13 +114,35 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
       return;
     }
 
+    if (!mealPlanId) {
+      toast({
+        title: 'Error',
+        description: 'No meal plan is currently selected. Please generate or select a meal plan first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
+      // First, verify the meal plan exists
+      const { data: mealPlan, error: mealPlanError } = await supabase
+        .from('meal_plans')
+        .select('id')
+        .eq('id', mealPlanId)
+        .single();
+
+      if (mealPlanError || !mealPlan) {
+        throw new Error('The associated meal plan could not be found.');
+      }
+
       const ingredients = meal.ingredients.map((ingredient: string) => ({
         user_id: user?.id,
         meal_plan_id: mealPlanId,
         item_name: ingredient,
         quantity: '1 unit',
         is_purchased: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }));
 
       const { error } = await supabase
@@ -134,12 +156,13 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
         description: 'Ingredients added to grocery list.',
       });
     } catch (error: any) {
+      console.error('Error adding to grocery list:', error);
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || 'Failed to add ingredients to grocery list.',
         variant: 'destructive',
       });
-    }
+    }  
   };
 
   const getYouTubeSearchUrl = (mealName: string) => {
