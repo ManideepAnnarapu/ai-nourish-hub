@@ -21,12 +21,51 @@ export const GroceryList = () => {
   const { toast } = useToast();
   const [groceryItems, setGroceryItems] = useState<GroceryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [availableWeeks, setAvailableWeeks] = useState<string[]>([]);
+  const [selectedWeek, setSelectedWeek] = useState<string | null>(null);
 
   useEffect(() => {
-    loadGroceryItems();
+    if (user) {
+      fetchAvailableWeeks();
+    }
   }, [user]);
 
-  const loadGroceryItems = async () => {
+  useEffect(() => {
+    if (user && selectedWeek) {
+      loadGroceryItems(selectedWeek);
+    }
+  }, [user, selectedWeek]);
+
+  // Fetch all meal plans for the user and set available weeks
+  const fetchAvailableWeeks = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('meal_plans')
+        .select('week_start_date')
+        .eq('user_id', user.id)
+        .order('week_start_date', { ascending: false });
+      if (error) throw error;
+      const weeks = (data || []).map(mp => mp.week_start_date);
+      setAvailableWeeks(weeks);
+      if (weeks.length > 0) {
+        setSelectedWeek(weeks[0]); // default to most recent
+      } else {
+        setSelectedWeek(null);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load grocery items for the selected week
+  const loadGroceryItems = async (weekStartDate: string) => {
     if (!user) return;
 
     try {
@@ -168,7 +207,20 @@ export const GroceryList = () => {
             {purchasedCount} of {totalCount} items purchased
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {availableWeeks.length > 0 && (
+            <select
+              value={selectedWeek || ''}
+              onChange={e => setSelectedWeek(e.target.value)}
+              className="border rounded px-2 py-1 text-sm"
+            >
+              {availableWeeks.map(week => (
+                <option key={week} value={week}>
+                  {new Date(week).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                </option>
+              ))}
+            </select>
+          )}
           <Button variant="outline" onClick={searchNearbyStores}>
             <MapPin className="h-4 w-4 mr-2" />
             Find Stores
