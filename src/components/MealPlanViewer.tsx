@@ -140,9 +140,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
         meal_plan_id: mealPlanId,
         item_name: ingredient,
         quantity: '1 unit',
-        is_purchased: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        is_purchased: false
       }));
 
       const { error } = await supabase
