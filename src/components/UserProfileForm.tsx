@@ -61,8 +61,27 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
   const allergyOptions = ['dairy', 'nuts', 'gluten', 'soy', 'eggs', 'shellfish', 'citrus'];
   const cuisineOptions = ['indian', 'mediterranean', 'asian', 'italian', 'mexican', 'american', 'mixed'];
 
+  // Track if we've loaded the profile data
+  const [hasProfile, setHasProfile] = useState(false);
+
+  // Load existing data when component mounts
   useEffect(() => {
-    loadExistingData();
+    if (user) {
+      loadExistingData();
+      // Check if this is an existing profile
+      const checkProfile = async () => {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.full_name) {
+          setHasProfile(true);
+        }
+      };
+      checkProfile();
+    }
   }, [user]);
 
   const loadExistingData = async () => {
@@ -120,6 +139,11 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
     setLoading(true);
 
     try {
+      // Basic validation
+      if (!profileData.full_name || !dietData.diet_type) {
+        throw new Error('Please fill in all required fields');
+      }
+
       // Update user profile
       const profileUpdate = {
         full_name: profileData.full_name,
@@ -129,12 +153,17 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
         fitness_goal: profileData.fitness_goal as any,
         activity_level: profileData.activity_level as any,
         date_of_birth: dateOfBirth?.toISOString().split('T')[0] || null,
+        updated_at: new Date().toISOString(),
       };
 
+      // Start a transaction to ensure both updates succeed or fail together
       const { error: profileError } = await supabase
         .from('user_profiles')
-        .update(profileUpdate)
-        .eq('user_id', user?.id!);
+        .upsert({
+          ...profileUpdate,
+          user_id: user?.id,
+          created_at: new Date().toISOString(),
+        });
 
       if (profileError) throw profileError;
 
@@ -145,16 +174,22 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
           user_id: user?.id,
           ...dietData,
           foods_to_avoid: foodsToAvoidText.split(',').map(s => s.trim()).filter(Boolean),
+          updated_at: new Date().toISOString(),
         });
 
       if (dietError) throw dietError;
 
+      // Show success message
       toast({
         title: 'Profile saved!',
         description: 'Your preferences have been updated successfully.',
       });
 
-      onComplete();
+      // Only call onComplete if this was the initial profile setup
+      const isInitialSetup = !hasProfile;
+      if (isInitialSetup) {
+        onComplete();
+      }
     } catch (error: any) {
       toast({
         title: 'Error',

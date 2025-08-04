@@ -17,20 +17,21 @@ export const Dashboard = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [currentMealPlan, setCurrentMealPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  // Initialize activeTab from localStorage if profile is complete, otherwise default to 'profile'
-  const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem('profileComplete') === 'true' ? 'meal-plan' : 'profile';
-  });
+  const [activeTab, setActiveTab] = useState('profile');
 
   useEffect(() => {
     if (user) {
-      checkUserProfile();
-      loadCurrentMealPlan();
+      const checkAuth = async () => {
+        await checkUserProfile();
+        await loadCurrentMealPlan();
+      };
+      checkAuth();
     }
   }, [user]);
 
   const checkUserProfile = async () => {
     try {
+      setLoading(true);
       const [
         { data: profile },
         { data: preferences }
@@ -50,12 +51,9 @@ export const Dashboard = () => {
       const isProfileComplete = Boolean(profile?.full_name && preferences?.diet_type);
       setHasProfile(isProfileComplete);
       
-      // If profile is complete, switch to meal plan tab
       if (isProfileComplete) {
-        localStorage.setItem('profileComplete', 'true');
         setActiveTab('meal-plan');
       } else {
-        localStorage.removeItem('profileComplete');
         setActiveTab('profile');
       }
     } catch (error) {
@@ -84,16 +82,28 @@ export const Dashboard = () => {
   };
 
   const handleProfileComplete = async () => {
-    // Refresh the profile data to ensure we have the latest state
-    await checkUserProfile();
-    
-    // Force update the tab to meal-plan after profile completion
-    setActiveTab('meal-plan');
-    
-    toast({
-      title: 'Profile updated!',
-      description: 'Your profile has been saved successfully.',
-    });
+    try {
+      // Force a small delay to ensure the database has time to update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Refresh the profile data
+      await checkUserProfile();
+      
+      // Force update the tab to meal-plan after profile completion
+      setActiveTab('meal-plan');
+      
+      toast({
+        title: 'Profile updated!',
+        description: 'Your profile has been saved successfully.',
+      });
+    } catch (error) {
+      console.error('Error in handleProfileComplete:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update profile status. Please refresh the page.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleMealPlanGenerated = (mealPlan: any) => {
@@ -108,8 +118,8 @@ export const Dashboard = () => {
     );
   }
 
-  // Show full-screen profile form only if profile is incomplete and we're not already on the profile tab
-  if (!hasProfile && activeTab !== 'profile') {
+  // Show full-screen profile form only if profile is incomplete
+  if (!hasProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
         <div className="container mx-auto py-8 px-4">
