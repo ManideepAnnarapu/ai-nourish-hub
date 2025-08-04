@@ -153,16 +153,14 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
         fitness_goal: profileData.fitness_goal as any,
         activity_level: profileData.activity_level as any,
         date_of_birth: dateOfBirth?.toISOString().split('T')[0] || null,
-        updated_at: new Date().toISOString(),
       };
 
-      // Start a transaction to ensure both updates succeed or fail together
+      // Upsert user profile WITHOUT created_at/updated_at
       const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({
           ...profileUpdate,
           user_id: user?.id,
-          created_at: new Date().toISOString(),
         });
 
       if (profileError) throw profileError;
@@ -174,7 +172,6 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
           user_id: user?.id,
           ...dietData,
           foods_to_avoid: foodsToAvoidText.split(',').map(s => s.trim()).filter(Boolean),
-          updated_at: new Date().toISOString(),
         });
 
       if (dietError) throw dietError;
