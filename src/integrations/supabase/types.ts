@@ -14,7 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      diet_preferences: {
+        Row: {
+          allergies: string[] | null
+          diet_type: string | null
+          foods_to_avoid: string[] | null
+          include_snacks: boolean | null
+          meal_times: Json | null
+          preferred_cuisines: string[] | null
+          reminder_enabled: boolean | null
+          reminder_tone: string | null
+          user_id: string
+        }
+        Insert: {
+          allergies?: string[] | null
+          diet_type?: string | null
+          foods_to_avoid?: string[] | null
+          include_snacks?: boolean | null
+          meal_times?: Json | null
+          preferred_cuisines?: string[] | null
+          reminder_enabled?: boolean | null
+          reminder_tone?: string | null
+          user_id: string
+        }
+        Update: {
+          allergies?: string[] | null
+          diet_type?: string | null
+          foods_to_avoid?: string[] | null
+          include_snacks?: boolean | null
+          meal_times?: Json | null
+          preferred_cuisines?: string[] | null
+          reminder_enabled?: boolean | null
+          reminder_tone?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      grocery_lists: {
+        Row: {
+          id: string
+          is_purchased: boolean | null
+          item_name: string | null
+          notes: string | null
+          quantity: string | null
+          user_id: string | null
+          week_start_date: string | null
+        }
+        Insert: {
+          id?: string
+          is_purchased?: boolean | null
+          item_name?: string | null
+          notes?: string | null
+          quantity?: string | null
+          user_id?: string | null
+          week_start_date?: string | null
+        }
+        Update: {
+          id?: string
+          is_purchased?: boolean | null
+          item_name?: string | null
+          notes?: string | null
+          quantity?: string | null
+          user_id?: string | null
+          week_start_date?: string | null
+        }
+        Relationships: []
+      }
+      meal_plans: {
+        Row: {
+          created_at: string | null
+          id: string
+          meals_per_day: number | null
+          plan_data: Json | null
+          total_days: number | null
+          user_id: string | null
+          week_start_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          meals_per_day?: number | null
+          plan_data?: Json | null
+          total_days?: number | null
+          user_id?: string | null
+          week_start_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          meals_per_day?: number | null
+          plan_data?: Json | null
+          total_days?: number | null
+          user_id?: string | null
+          week_start_date?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          is_sent: boolean | null
+          message: string | null
+          scheduled_time: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          is_sent?: boolean | null
+          message?: string | null
+          scheduled_time?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          is_sent?: boolean | null
+          message?: string | null
+          scheduled_time?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          activity_level: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          fitness_goal: string | null
+          full_name: string | null
+          gender: string | null
+          height_cm: number | null
+          id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          activity_level?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          fitness_goal?: string | null
+          full_name?: string | null
+          gender?: string | null
+          height_cm?: number | null
+          id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          activity_level?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          fitness_goal?: string | null
+          full_name?: string | null
+          gender?: string | null
+          height_cm?: number | null
+          id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
