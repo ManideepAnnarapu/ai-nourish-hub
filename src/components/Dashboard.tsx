@@ -17,17 +17,15 @@ export const Dashboard = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [currentMealPlan, setCurrentMealPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('profile'); // Default to profile tab
+  // Initialize activeTab from localStorage if profile is complete, otherwise default to 'profile'
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('profileComplete') === 'true' ? 'meal-plan' : 'profile';
+  });
 
   useEffect(() => {
     if (user) {
       checkUserProfile();
       loadCurrentMealPlan();
-      // Check if profile was previously completed
-      const isProfileComplete = localStorage.getItem('profileComplete') === 'true';
-      if (isProfileComplete) {
-        setActiveTab('meal-plan');
-      }
     }
   }, [user]);
 
@@ -89,6 +87,9 @@ export const Dashboard = () => {
     // Refresh the profile data to ensure we have the latest state
     await checkUserProfile();
     
+    // Force update the tab to meal-plan after profile completion
+    setActiveTab('meal-plan');
+    
     toast({
       title: 'Profile updated!',
       description: 'Your profile has been saved successfully.',
@@ -107,7 +108,8 @@ export const Dashboard = () => {
     );
   }
 
-  if (!hasProfile) {
+  // Show full-screen profile form only if profile is incomplete and we're not already on the profile tab
+  if (!hasProfile && activeTab !== 'profile') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
         <div className="container mx-auto py-8 px-4">
@@ -153,10 +155,14 @@ export const Dashboard = () => {
               <Calendar className="h-4 w-4" />
               Calendar
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Profile
-            </TabsTrigger>
+            <TabsTrigger 
+            value="profile" 
+            className="flex items-center gap-2"
+            data-state={hasProfile ? 'inactive' : 'active'}
+          >
+            <User className="h-4 w-4" />
+            {hasProfile ? 'Profile' : 'Complete Profile'}
+          </TabsTrigger>
           </TabsList>
 
           <TabsContent value="meal-plan">
