@@ -268,7 +268,17 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
                       {meal.ingredients && meal.ingredients.length > 0 && (
                         <Button
                           size="sm"
-                          onClick={() => addIngredientsToGroceryList(meal, currentMealPlan.id)}
+                          onClick={() => {
+                            if (!currentMealPlan?.id) {
+                              toast({
+                                title: 'Error',
+                                description: 'No active meal plan found. Please generate a meal plan first.',
+                                variant: 'destructive',
+                              });
+                              return;
+                            }
+                            addIngredientsToGroceryList(meal, currentMealPlan.id);
+                          }}
                         >
                           <ShoppingCart className="h-4 w-4 mr-1" />
                           Add to List
