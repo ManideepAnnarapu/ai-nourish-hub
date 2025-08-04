@@ -17,11 +17,17 @@ export const Dashboard = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [currentMealPlan, setCurrentMealPlan] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('profile'); // Default to profile tab
 
   useEffect(() => {
     if (user) {
       checkUserProfile();
       loadCurrentMealPlan();
+      // Check if profile was previously completed
+      const isProfileComplete = localStorage.getItem('profileComplete') === 'true';
+      if (isProfileComplete) {
+        setActiveTab('meal-plan');
+      }
     }
   }, [user]);
 
@@ -60,6 +66,8 @@ export const Dashboard = () => {
 
   const handleProfileComplete = () => {
     setHasProfile(true);
+    setActiveTab('meal-plan');
+    localStorage.setItem('profileComplete', 'true');
     toast({
       title: 'Profile completed!',
       description: 'You can now generate your meal plan.',
@@ -106,7 +114,11 @@ export const Dashboard = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="meal-plan" className="w-full">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="meal-plan" className="flex items-center gap-2">
               <ChefHat className="h-4 w-4" />
