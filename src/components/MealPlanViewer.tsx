@@ -28,36 +28,70 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
   const generateMealPlan = async () => {
     setLoading(true);
     try {
+      console.log('Fetching user preferences...');
       // Get user preferences
-      const { data: preferences } = await supabase
+      const { data: preferences, error: prefError } = await supabase
         .from('diet_preferences')
         .select('*')
         .eq('user_id', user?.id)
         .single();
 
+      if (prefError) {
+        console.error('Error fetching preferences:', prefError);
+        throw new Error('Failed to load your preferences. Please try again.');
+      }
+
       if (!preferences) {
+        const errorMsg = 'No preferences found. Please complete your profile first.';
+        console.error(errorMsg);
         toast({
-          title: 'Error',
-          description: 'Please complete your profile first.',
+          title: 'Profile Incomplete',
+          description: errorMsg,
           variant: 'destructive',
         });
         return;
       }
 
-      // Call the edge function
-      const { data, error } = await supabase.functions.invoke('generate-meal-plan', {
-        body: { preferences }
-      });
+      console.log('Preferences loaded:', JSON.stringify(preferences, null, 2));
+      console.log('Calling generate-meal-plan Edge Function...');
+      
+      try {
+        // Call the edge function with timeout
+        const response = await Promise.race([
+          supabase.functions.invoke('generate-meal-plan', {
+            body: { preferences }
+          }),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timed out after 20s')), 20000)
+          )
+        ]) as { data: any, error: any };
 
-      if (error) throw error;
+        console.log('Edge Function response:', response);
 
-      if (data.success) {
-        setPlanData(data.planData);
-        onMealPlanGenerated(data.mealPlan);
-        toast({
-          title: 'Success!',
-          description: 'Your meal plan has been generated.',
-        });
+        if (response.error) {
+          console.error('Edge Function returned an error:', response.error);
+          throw new Error(response.error.message || 'Failed to generate meal plan');
+        }
+
+        if (!response.data) {
+          throw new Error('No data returned from the server');
+        }
+
+        if (response.data.success) {
+          console.log('Meal plan generated successfully:', response.data.mealPlan);
+          setPlanData(response.data.planData);
+          onMealPlanGenerated(response.data.mealPlan);
+          toast({
+            title: 'Success!',
+            description: 'Your meal plan has been generated.',
+          });
+        } else {
+          console.error('Unexpected response format:', response.data);
+          throw new Error('Unexpected response from the server');
+        }
+      } catch (edgeError: any) {
+        console.error('Edge Function call failed:', edgeError);
+        throw new Error(`Failed to generate meal plan: ${edgeError.message}`);
       }
     } catch (error: any) {
       toast({
