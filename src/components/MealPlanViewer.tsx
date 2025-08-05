@@ -17,6 +17,55 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [planData, setPlanData] = useState<any>(null);
+  const [defaultTab, setDefaultTab] = useState<string>('day-1');
+
+  // Helper: Get start of week (Sunday)
+  function getStartOfWeek(date: Date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - d.getDay()); // Sunday = 0
+    return d;
+  }
+
+  // Helper: Format date as yyyy-mm-dd
+  function formatDate(date: Date) {
+    return date.toISOString().split('T')[0];
+  }
+
+  // On planData or currentMealPlan change, update planData with correct dates and set default tab
+  useEffect(() => {
+    if (currentMealPlan?.plan_data) {
+      // Find the week start (Sunday) for the meal plan
+      let weekStart: Date;
+      if (currentMealPlan.week_start_date) {
+        weekStart = new Date(currentMealPlan.week_start_date);
+      } else {
+        weekStart = getStartOfWeek(new Date());
+      }
+
+      // Map days to add correct date
+      const daysWithDates = currentMealPlan.plan_data.days?.map((day: any, idx: number) => {
+        const dayDate = new Date(weekStart);
+        dayDate.setDate(weekStart.getDate() + idx); // idx: 0=Sunday, 1=Monday, ...
+        return {
+          ...day,
+          date: formatDate(dayDate),
+        };
+      });
+
+      setPlanData({ ...currentMealPlan.plan_data, days: daysWithDates });
+
+      // Set default tab to today (relative to week start)
+      const today = new Date();
+      const todayIdx = (today.getDay()); // 0=Sunday, 1=Monday, ...
+      setDefaultTab(`day-${todayIdx + 1}`); // Day 1 = Sunday
+    }
+  }, [currentMealPlan]);
+
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [planData, setPlanData] = useState(null);
 
   useEffect(() => {
@@ -250,7 +299,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
         </Button>
       </div>
 
-      <Tabs defaultValue="day-1" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         {/* Modern Pill-shaped Day Tabs */}
         <div className="flex justify-center mb-8">
           <TabsList className="glass p-2 rounded-2xl bg-secondary/40 border border-border/20 shadow-lg flex-wrap">
@@ -275,7 +324,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
               </h3>
               <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                 <Badge variant="outline" className="rounded-full px-3 py-1">
-                  {day.date}
+                  {new Date(day.date).toLocaleDateString()}
                 </Badge>
                 <Badge className="rounded-full px-3 py-1 bg-primary/10 text-primary border-primary/20">
                   <Utensils className="h-3 w-3 mr-1" />
