@@ -63,11 +63,6 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
     }
   }, [currentMealPlan]);
 
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [planData, setPlanData] = useState(null);
-
   useEffect(() => {
     if (currentMealPlan?.plan_data) {
       setPlanData(currentMealPlan.plan_data);
