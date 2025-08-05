@@ -63,11 +63,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
     }
   }, [currentMealPlan]);
 
-  useEffect(() => {
-    if (currentMealPlan?.plan_data) {
-      setPlanData(currentMealPlan.plan_data);
-    }
-  }, [currentMealPlan]);
+  
 
   const generateMealPlan = async () => {
     setLoading(true);
