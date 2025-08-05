@@ -21,9 +21,12 @@ export type Database = {
           foods_to_avoid: string[] | null
           include_snacks: boolean | null
           meal_times: Json | null
+          meals_per_day: number | null
           preferred_cuisines: string[] | null
           reminder_enabled: boolean | null
           reminder_tone: string | null
+          total_days: number | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -32,9 +35,12 @@ export type Database = {
           foods_to_avoid?: string[] | null
           include_snacks?: boolean | null
           meal_times?: Json | null
+          meals_per_day?: number | null
           preferred_cuisines?: string[] | null
           reminder_enabled?: boolean | null
           reminder_tone?: string | null
+          total_days?: number | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -43,9 +49,12 @@ export type Database = {
           foods_to_avoid?: string[] | null
           include_snacks?: boolean | null
           meal_times?: Json | null
+          meals_per_day?: number | null
           preferred_cuisines?: string[] | null
           reminder_enabled?: boolean | null
           reminder_tone?: string | null
+          total_days?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -143,7 +152,8 @@ export type Database = {
           full_name: string | null
           gender: string | null
           height_cm: number | null
-          id: string
+          updated_at: string | null
+          user_id: string
           weight_kg: number | null
         }
         Insert: {
@@ -154,7 +164,8 @@ export type Database = {
           full_name?: string | null
           gender?: string | null
           height_cm?: number | null
-          id: string
+          updated_at?: string | null
+          user_id: string
           weight_kg?: number | null
         }
         Update: {
@@ -165,7 +176,8 @@ export type Database = {
           full_name?: string | null
           gender?: string | null
           height_cm?: number | null
-          id?: string
+          updated_at?: string | null
+          user_id?: string
           weight_kg?: number | null
         }
         Relationships: []

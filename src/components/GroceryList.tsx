@@ -138,7 +138,7 @@ export const GroceryList = () => {
 
       if (error) throw error;
 
-      loadGroceryItems();
+      loadCurrentWeekGroceryItems();
       toast({
         title: 'Success',
         description: 'Purchased items cleared.',

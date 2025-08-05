@@ -69,8 +69,12 @@ serve(async (req) => {
 
     // Generate meal plan (try OpenRouter first, fallback to local generation)
     let planData;
-    const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY') || 
-      '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';
+    const openRouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+    
+    if (!openRouterApiKey) {
+      console.error('OPENROUTER_API_KEY not configured, using fallback meal plan');
+      planData = generateFallbackMealPlan(preferences);
+    } else {
 
     try {
       const prompt = `Create a ${preferences.total_days}-day ${preferences.diet_type} meal plan with ${preferences.meals_per_day} meals per day. 
@@ -133,6 +137,7 @@ serve(async (req) => {
       console.error('Error generating AI meal plan, using fallback:', aiError);
       planData = generateFallbackMealPlan(preferences);
     }
+    }
 
     // Save to database using service role to bypass RLS
     const weekStartDate = new Date().toISOString().split('T')[0];
@@ -162,7 +167,7 @@ serve(async (req) => {
             for (const ingredient of meal.ingredients) {
               ingredients.push({
                 user_id: user.id,
-                meal_plan_id: mealPlan.id,
+                week_start_date: weekStartDate,
                 item_name: ingredient,
                 quantity: '1 unit',
                 is_purchased: false

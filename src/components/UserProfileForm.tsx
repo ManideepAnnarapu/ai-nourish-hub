@@ -155,12 +155,12 @@ export const UserProfileForm = ({ onComplete }: UserProfileFormProps) => {
         date_of_birth: dateOfBirth?.toISOString().split('T')[0] || null,
       };
 
-      // Upsert user profile WITHOUT created_at/updated_at
+      // Upsert user profile
       const { error: profileError } = await supabase
         .from('user_profiles')
         .upsert({
-          ...profileUpdate,
           user_id: user?.id,
+          ...profileUpdate,
         });
 
       if (profileError) throw profileError;
