@@ -210,21 +210,94 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
             ) : (
               <>
                 <Star className="h-5 w-5 mr-3" />
-                Generate My Meal Plan
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </div>
-    );
+  }
+};
+
+const addIngredientsToGroceryList = async (meal: any, mealPlanId: string | undefined) => {
+  if (!meal.ingredients || meal.ingredients.length === 0) {
+    toast({
+      title: 'No ingredients',
+      description: 'This meal has no ingredients to add.',
+      variant: 'destructive',
+    });
+    return;
   }
 
+  if (!mealPlanId) {
+    toast({
+      title: 'Error',
+      description: 'No meal plan is currently selected. Please generate or select a meal plan first.',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  try {
+    // Get the meal plan to get the week_start_date
+    const { data: mealPlan, error: mealPlanError } = await supabase
+      .from('meal_plans')
+      .select('week_start_date')
+      .eq('id', mealPlanId)
+      .single();
+
+    if (mealPlanError || !mealPlan) {
+      throw new Error('The associated meal plan could not be found.');
+    }
+
+    if (!mealPlan.week_start_date) {
+      throw new Error('Meal plan is missing week start date.');
+    }
+
+    // Insert each ingredient as a separate grocery list item
+    const { error } = await supabase
+      .from('grocery_lists')
+      .insert(
+        meal.ingredients.map((ingredient: string) => ({
+          user_id: user?.id,
+          week_start_date: mealPlan.week_start_date,
+          item_name: ingredient,
+          quantity: '1 unit',
+          is_purchased: false
+        }))
+      );
+
+    if (error) throw error;
+
+    toast({
+      title: 'Success!',
+      description: 'Ingredients added to grocery list.',
+    });
+  } catch (error: any) {
+    console.error('Error adding to grocery list:', error);
+    toast({
+      title: 'Error',
+      description: error.message || 'Failed to add ingredients to grocery list.',
+      variant: 'destructive',
+    });
+  }
+};
+
+const getYouTubeSearchUrl = (mealName: string) => {
+  const query = encodeURIComponent(`${mealName} recipe`);
+  return `https://www.youtube.com/results?search_query=${query}`;
+};
+
+// Helper function to get meal type styling
+const getMealTypeClass = (mealType: string) => {
+  const type = mealType.toLowerCase();
+  if (type.includes('breakfast')) return 'meal-breakfast';
+  if (type.includes('lunch')) return 'meal-lunch';
+  if (type.includes('dinner')) return 'meal-dinner';
+  if (type.includes('snack')) return 'meal-snack';
+  return 'meal-breakfast';
+};
+
+if (!planData) {
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div className="space-y-1">
-          <h2 className="text-3xl font-display font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+    <div className="card-modern max-w-2xl mx-auto">
+      <CardHeader className="text-center pb-8">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center">
+          <ChefHat className="h-10 w-10 text-primary-foreground" />
             Your Meal Plan
           </h2>
           <p className="text-muted-foreground">
