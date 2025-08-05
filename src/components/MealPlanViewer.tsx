@@ -225,7 +225,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
 
   if (!planData) {
     return (
-      <div className="card-modern max-w-2xl mx-auto">
+      <div className="card-modern max-w-2xl mx-auto w-full">
         <CardHeader className="text-center pb-8">
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center">
             <ChefHat className="h-10 w-10 text-primary-foreground" />
@@ -260,7 +260,7 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in px-2 sm:px-4 overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="space-y-1">
