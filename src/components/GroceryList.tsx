@@ -181,21 +181,23 @@ export const GroceryList = () => {
   const totalCount = groceryItems.length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Grocery List</h2>
+          <h2 className="text-3xl font-display font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+            Grocery List
+          </h2>
           <p className="text-muted-foreground">
             {purchasedCount} of {totalCount} items purchased
           </p>
         </div>
         <div className="flex gap-2 items-center">
-          <Button variant="outline" onClick={searchNearbyStores}>
+          <Button variant="outline" onClick={searchNearbyStores} className="action-btn rounded-xl">
             <MapPin className="h-4 w-4 mr-2" />
             Find Stores
           </Button>
           {purchasedCount > 0 && (
-            <Button variant="outline" onClick={clearPurchased}>
+            <Button variant="outline" onClick={clearPurchased} className="action-btn rounded-xl hover:bg-destructive/10 hover:text-destructive">
               <Trash2 className="h-4 w-4 mr-2" />
               Clear Purchased
             </Button>
@@ -204,62 +206,71 @@ export const GroceryList = () => {
       </div>
 
       {groceryItems.length === 0 ? (
-        <Card>
-          <CardHeader className="text-center">
-            <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <CardTitle>No items in your grocery list</CardTitle>
-            <CardDescription>
+        <div className="card-modern max-w-2xl mx-auto">
+          <CardHeader className="text-center py-12">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/20 flex items-center justify-center">
+              <ShoppingCart className="h-10 w-10 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-display">No items in your grocery list</CardTitle>
+            <CardDescription className="text-lg mt-2">
               Generate a meal plan to automatically populate your grocery list
             </CardDescription>
           </CardHeader>
-        </Card>
+        </div>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
+        <div className="card-modern">
+          <CardHeader className="border-b border-border/20">
+            <CardTitle className="flex items-center gap-3 text-xl font-display">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center">
+                <ShoppingCart className="h-4 w-4 text-primary-foreground" />
+              </div>
               Shopping List
             </CardTitle>
             <CardDescription>
               Check off items as you shop
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="space-y-3">
               {groceryItems.map((item) => (
                 <div
                   key={item.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg border ${
-                    item.is_purchased ? 'bg-muted/50' : 'bg-background'
+                  className={`glass p-4 rounded-xl border transition-all duration-300 ${
+                    item.is_purchased 
+                      ? 'bg-muted/30 border-muted' 
+                      : 'border-border/20 hover:border-primary/30'
                   }`}
                 >
-                  <Checkbox
-                    checked={item.is_purchased}
-                    onCheckedChange={(checked) => togglePurchased(item.id, checked as boolean)}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className={`font-medium ${item.is_purchased ? 'line-through text-muted-foreground' : ''}`}>
-                      {item.item_name}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {item.quantity}
-                    </div>
-                    {item.notes && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {item.notes}
+                  <div className="flex items-center space-x-4">
+                    <Checkbox
+                      checked={item.is_purchased}
+                      onCheckedChange={(checked) => togglePurchased(item.id, checked as boolean)}
+                      className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className={`font-medium ${item.is_purchased ? 'line-through text-muted-foreground' : ''}`}>
+                        {item.item_name}
                       </div>
+                      <div className="text-sm text-muted-foreground">
+                        {item.quantity}
+                      </div>
+                      {item.notes && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {item.notes}
+                        </div>
+                      )}
+                    </div>
+                    {item.is_purchased && (
+                      <Badge className="bg-primary/10 text-primary border-primary/20 rounded-full">
+                        Purchased
+                      </Badge>
                     )}
                   </div>
-                  {item.is_purchased && (
-                    <Badge variant="secondary" className="text-xs">
-                      Purchased
-                    </Badge>
-                  )}
                 </div>
               ))}
             </div>
           </CardContent>
-        </Card>
+        </div>
       )}
     </div>
   );

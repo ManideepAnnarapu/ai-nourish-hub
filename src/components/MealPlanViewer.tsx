@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ChefHat, Clock, ShoppingCart, Play } from 'lucide-react';
+import { ChefHat, Clock, ShoppingCart, Play, Utensils, Star } from 'lucide-react';
 
 interface MealPlanViewerProps {
   currentMealPlan: any;
@@ -173,106 +173,189 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
     return `https://www.youtube.com/results?search_query=${query}`;
   };
 
+  // Helper function to get meal type styling
+  const getMealTypeClass = (mealType: string) => {
+    const type = mealType.toLowerCase();
+    if (type.includes('breakfast')) return 'meal-breakfast';
+    if (type.includes('lunch')) return 'meal-lunch';
+    if (type.includes('dinner')) return 'meal-dinner';
+    if (type.includes('snack')) return 'meal-snack';
+    return 'meal-breakfast';
+  };
+
   if (!planData) {
     return (
-      <Card>
-        <CardHeader className="text-center">
-          <ChefHat className="h-16 w-16 mx-auto mb-4 text-primary" />
-          <CardTitle>Generate Your Meal Plan</CardTitle>
-          <CardDescription>
+      <div className="card-modern max-w-2xl mx-auto">
+        <CardHeader className="text-center pb-8">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center">
+            <ChefHat className="h-10 w-10 text-primary-foreground" />
+          </div>
+          <CardTitle className="text-2xl font-display">Generate Your Meal Plan</CardTitle>
+          <CardDescription className="text-lg mt-2">
             Create a personalized meal plan based on your preferences and goals
           </CardDescription>
         </CardHeader>
-        <CardContent className="text-center">
-          <Button onClick={generateMealPlan} disabled={loading} size="lg">
-            {loading ? 'Generating...' : 'Generate My Meal Plan'}
+        <CardContent className="text-center pb-8">
+          <Button 
+            onClick={generateMealPlan} 
+            disabled={loading} 
+            size="lg"
+            className="btn-gradient px-8 py-4 text-lg font-semibold rounded-2xl min-w-[200px]"
+          >
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-foreground border-t-transparent mr-3"></div>
+                Generating...
+              </>
+            ) : (
+              <>
+                <Star className="h-5 w-5 mr-3" />
+                Generate My Meal Plan
+              </>
+            )}
           </Button>
         </CardContent>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Your Meal Plan</h2>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-display font-bold bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+            Your Meal Plan
+          </h2>
           <p className="text-muted-foreground">
             {planData.days?.length || 0} days • Generated on {currentMealPlan?.created_at ? new Date(currentMealPlan.created_at).toLocaleDateString() : 'today'}
           </p>
         </div>
-        <Button onClick={generateMealPlan} disabled={loading}>
-          {loading ? 'Regenerating...' : 'Generate New Plan'}
+        <Button 
+          onClick={generateMealPlan} 
+          disabled={loading}
+          className="btn-gradient px-6 py-3 rounded-xl font-medium"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent mr-2"></div>
+              Regenerating...
+            </>
+          ) : (
+            <>
+              <Star className="h-4 w-4 mr-2" />
+              Generate New Plan
+            </>
+          )}
         </Button>
       </div>
 
       <Tabs defaultValue="day-1" className="w-full">
-        <TabsList className="grid grid-cols-7 w-full">
-          {planData.days?.map((day: any, index: number) => (
-            <TabsTrigger key={day.day} value={`day-${day.day}`}>
-              Day {day.day}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        {/* Modern Pill-shaped Day Tabs */}
+        <div className="flex justify-center mb-8">
+          <TabsList className="glass p-2 rounded-2xl bg-secondary/40 border border-border/20 shadow-lg flex-wrap">
+            {planData.days?.map((day: any, index: number) => (
+              <TabsTrigger 
+                key={day.day} 
+                value={`day-${day.day}`}
+                className="pill-tab"
+              >
+                Day {day.day}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
         
         {planData.days?.map((day: any) => (
-          <TabsContent key={day.day} value={`day-${day.day}`} className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Badge variant="outline">{day.date}</Badge>
-              <Badge>{day.meals?.length || 0} meals</Badge>
+          <TabsContent key={day.day} value={`day-${day.day}`} className="space-y-6 animate-scale-in">
+            {/* Day Header */}
+            <div className="glass p-4 rounded-2xl border border-border/20 text-center">
+              <h3 className="font-display text-xl font-semibold mb-2">
+                Day {day.day}
+              </h3>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                <Badge variant="outline" className="rounded-full px-3 py-1">
+                  {day.date}
+                </Badge>
+                <Badge className="rounded-full px-3 py-1 bg-primary/10 text-primary border-primary/20">
+                  <Utensils className="h-3 w-3 mr-1" />
+                  {day.meals?.length || 0} meals
+                </Badge>
+              </div>
             </div>
             
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Meal Cards Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {day.meals?.map((meal: any, mealIndex: number) => (
-                <Card key={mealIndex} className="h-full">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{meal.name}</CardTitle>
-                        <CardDescription className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {meal.type}
-                        </CardDescription>
+                <div key={mealIndex} className="card-modern group hover:scale-102 transition-transform duration-300">
+                  {/* Meal Image Placeholder */}
+                  <div className="h-48 bg-gradient-to-br from-primary/10 via-secondary/20 to-accent/10 rounded-t-[var(--radius-large)] flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
+                    <div className="relative z-10 text-center">
+                      <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                        <Utensils className="h-8 w-8 text-primary" />
                       </div>
-                      <Badge variant="secondary">{meal.type}</Badge>
+                      <Badge className={`${getMealTypeClass(meal.type)} rounded-full px-3 py-1 font-medium`}>
+                        {meal.type}
+                      </Badge>
                     </div>
+                  </div>
+
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-display leading-tight">
+                      {meal.name}
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Perfect for {meal.type.toLowerCase()}
+                    </CardDescription>
                   </CardHeader>
+
                   <CardContent className="space-y-4">
+                    {/* Recipe Description */}
                     <div>
-                      <h4 className="font-medium mb-2">Recipe</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {meal.recipe || 'No recipe available'}
+                      <h4 className="font-semibold mb-2 text-sm uppercase tracking-wide text-muted-foreground">Recipe</h4>
+                      <p className="text-sm leading-relaxed">
+                        {meal.recipe || 'A delicious and nutritious meal tailored to your preferences.'}
                       </p>
                     </div>
                     
+                    {/* Ingredients */}
                     {meal.ingredients && meal.ingredients.length > 0 && (
                       <div>
-                        <h4 className="font-medium mb-2">Ingredients</h4>
-                        <ul className="text-sm text-muted-foreground space-y-1">
-                          {meal.ingredients.slice(0, 5).map((ingredient: string, i: number) => (
-                            <li key={i}>• {ingredient}</li>
-                          ))}
-                          {meal.ingredients.length > 5 && (
-                            <li className="text-xs">...and {meal.ingredients.length - 5} more</li>
-                          )}
-                        </ul>
+                        <h4 className="font-semibold mb-2 text-sm uppercase tracking-wide text-muted-foreground">Ingredients</h4>
+                        <div className="glass p-3 rounded-xl">
+                          <ul className="text-sm space-y-1">
+                            {meal.ingredients.slice(0, 4).map((ingredient: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+                                <span>{ingredient}</span>
+                              </li>
+                            ))}
+                            {meal.ingredients.length > 4 && (
+                              <li className="text-xs text-muted-foreground font-medium pt-1">
+                                +{meal.ingredients.length - 4} more ingredients
+                              </li>
+                            )}
+                          </ul>
+                        </div>
                       </div>
                     )}
                     
-                    <div className="flex gap-2">
+                    {/* Action Buttons */}
+                    <div className="flex flex-col gap-2 pt-2">
                       <Button
-                        size="sm"
                         variant="outline"
-                        className="flex-1"
+                        className="action-btn rounded-xl border-primary/20 hover:bg-primary/5 hover:border-primary/40 w-full"
                         onClick={() => window.open(getYouTubeSearchUrl(meal.name), '_blank')}
                       >
-                        <Play className="h-4 w-4 mr-1" />
-                        Recipe Video
+                        <Play className="h-4 w-4" />
+                        Watch Recipe Video
                       </Button>
                       
                       {meal.ingredients && meal.ingredients.length > 0 && (
                         <Button
-                          size="sm"
+                          className="action-btn btn-gradient w-full rounded-xl"
                           onClick={() => {
                             if (!currentMealPlan?.id) {
                               toast({
@@ -285,13 +368,13 @@ export const MealPlanViewer = ({ currentMealPlan, onMealPlanGenerated }: MealPla
                             addIngredientsToGroceryList(meal, currentMealPlan.id);
                           }}
                         >
-                          <ShoppingCart className="h-4 w-4 mr-1" />
-                          Add to List
+                          <ShoppingCart className="h-4 w-4" />
+                          Add to Grocery List
                         </Button>
                       )}
                     </div>
                   </CardContent>
-                </Card>
+                </div>
               ))}
             </div>
           </TabsContent>

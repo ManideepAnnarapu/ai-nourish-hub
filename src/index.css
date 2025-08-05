@@ -2,95 +2,141 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Modern NutriPlanner Design System - All colors MUST be HSL */
 
 @layer base {
   :root {
-    --background: 120 20% 98%;
-    --foreground: 120 10% 9%;
+    /* Enhanced green color palette with gradients and pastels */
+    --background: 120 25% 97%;
+    --foreground: 120 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 120 10% 9%;
+    --card-foreground: 120 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 120 10% 9%;
+    --popover-foreground: 120 15% 15%;
 
-    --primary: 142 71% 45%;
+    /* Enhanced primary green with variations */
+    --primary: 142 76% 48%;
+    --primary-light: 142 68% 60%;
+    --primary-dark: 142 85% 35%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 120 10% 95%;
-    --secondary-foreground: 120 6% 20%;
+    /* Soft pastel accents */
+    --secondary: 120 30% 96%;
+    --secondary-foreground: 120 15% 25%;
 
-    --muted: 120 10% 95%;
-    --muted-foreground: 120 4% 46%;
+    --muted: 120 20% 96%;
+    --muted-foreground: 120 8% 50%;
 
-    --accent: 120 10% 92%;
-    --accent-foreground: 120 6% 20%;
+    --accent: 160 45% 92%;
+    --accent-foreground: 120 15% 25%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 120 13% 91%;
-    --input: 120 13% 91%;
-    --ring: 142 71% 45%;
+    --border: 120 20% 92%;
+    --input: 120 20% 94%;
+    --ring: 142 76% 48%;
 
-    --radius: 0.5rem;
+    /* Enhanced radius for modern look */
+    --radius: 0.75rem;
+    --radius-large: 1.25rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 48%), hsl(160 68% 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(120 30% 96%), hsl(160 25% 94%));
+    --gradient-background: linear-gradient(180deg, hsl(120 25% 97%), hsl(160 20% 98%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(120 20% 98%));
+    
+    /* Shadows for modern depth */
+    --shadow-soft: 0 2px 8px -2px hsl(120 15% 15% / 0.05);
+    --shadow-medium: 0 4px 16px -4px hsl(120 15% 15% / 0.1);
+    --shadow-large: 0 8px 32px -8px hsl(120 15% 15% / 0.15);
+    --shadow-glow: 0 0 32px hsl(142 76% 48% / 0.15);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Glass effect */
+    --glass-bg: hsl(0 0% 100% / 0.7);
+    --glass-border: hsl(120 20% 92% / 0.5);
 
-    --sidebar-primary: 240 5.9% 10%;
-
+    /* Sidebar styling */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 120 15% 25%;
+    --sidebar-primary: 142 76% 48%;
     --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 120 30% 96%;
+    --sidebar-accent-foreground: 120 15% 25%;
+    --sidebar-border: 120 20% 92%;
+    --sidebar-ring: 142 76% 48%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Meal type colors */
+    --breakfast: 45 100% 65%;
+    --lunch: 25 85% 60%;
+    --dinner: 260 75% 65%;
+    --snack: 200 70% 65%;
   }
 
   .dark {
-    --background: 120 15% 6%;
-    --foreground: 120 10% 98%;
+    --background: 120 20% 8%;
+    --foreground: 120 15% 95%;
 
-    --card: 120 15% 8%;
-    --card-foreground: 120 10% 98%;
+    --card: 120 20% 10%;
+    --card-foreground: 120 15% 95%;
 
-    --popover: 120 15% 8%;
-    --popover-foreground: 120 10% 98%;
+    --popover: 120 20% 10%;
+    --popover-foreground: 120 15% 95%;
 
-    --primary: 142 71% 45%;
-    --primary-foreground: 120 15% 6%;
+    --primary: 142 76% 55%;
+    --primary-light: 142 68% 70%;
+    --primary-dark: 142 85% 40%;
+    --primary-foreground: 120 20% 8%;
 
-    --secondary: 120 10% 15%;
-    --secondary-foreground: 120 10% 98%;
+    --secondary: 120 15% 15%;
+    --secondary-foreground: 120 15% 95%;
 
-    --muted: 120 10% 15%;
+    --muted: 120 15% 15%;
     --muted-foreground: 120 8% 65%;
 
-    --accent: 120 10% 18%;
-    --accent-foreground: 120 10% 98%;
+    --accent: 120 15% 20%;
+    --accent-foreground: 120 15% 95%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 120 10% 18%;
-    --input: 120 10% 18%;
-    --ring: 142 71% 45%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 120 15% 20%;
+    --input: 120 15% 18%;
+    --ring: 142 76% 55%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 55%), hsl(160 68% 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(120 15% 15%), hsl(160 15% 18%));
+    --gradient-background: linear-gradient(180deg, hsl(120 20% 8%), hsl(160 15% 10%));
+    --gradient-card: linear-gradient(145deg, hsl(120 20% 10%), hsl(120 15% 12%));
+
+    /* Dark shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 4px 16px -4px hsl(0 0% 0% / 0.4);
+    --shadow-large: 0 8px 32px -8px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 32px hsl(142 76% 55% / 0.3);
+
+    /* Dark glass effect */
+    --glass-bg: hsl(120 20% 10% / 0.8);
+    --glass-border: hsl(120 15% 25% / 0.5);
+
+    --sidebar-background: 120 20% 10%;
+    --sidebar-foreground: 120 15% 90%;
+    --sidebar-primary: 142 76% 55%;
+    --sidebar-primary-foreground: 120 20% 8%;
+    --sidebar-accent: 120 15% 15%;
+    --sidebar-accent-foreground: 120 15% 90%;
+    --sidebar-border: 120 15% 20%;
+    --sidebar-ring: 142 76% 55%;
+
+    /* Dark meal type colors */
+    --breakfast: 45 90% 70%;
+    --lunch: 25 80% 65%;
+    --dinner: 260 70% 70%;
+    --snack: 200 65% 70%;
   }
 }
 
@@ -100,6 +146,76 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-background to-secondary font-sans text-foreground antialiased;
+    font-family: 'Inter', 'Nunito', system-ui, -apple-system, sans-serif;
+    background: var(--gradient-background);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+  }
+}
+
+@layer components {
+  /* Modern card styling */
+  .card-modern {
+    @apply bg-card rounded-[var(--radius-large)] shadow-[var(--shadow-medium)] backdrop-blur-sm;
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Gradient buttons */
+  .btn-gradient {
+    background: var(--gradient-primary);
+    @apply text-primary-foreground font-medium transition-all duration-300 hover:scale-105 hover:shadow-[var(--shadow-glow)] active:scale-95;
+  }
+
+  /* Meal type badges */
+  .meal-breakfast {
+    @apply bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300;
+  }
+  
+  .meal-lunch {
+    @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300;
+  }
+  
+  .meal-dinner {
+    @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300;
+  }
+  
+  .meal-snack {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300;
+  }
+
+  /* Animated pill tabs */
+  .pill-tab {
+    @apply px-6 py-3 rounded-full font-medium transition-all duration-300 cursor-pointer select-none;
+  }
+  
+  .pill-tab.active {
+    background: var(--gradient-primary);
+    @apply text-primary-foreground shadow-[var(--shadow-medium)] scale-105;
+  }
+  
+  .pill-tab:not(.active) {
+    @apply bg-secondary/60 text-secondary-foreground hover:bg-secondary hover:scale-102;
+  }
+
+  /* Action button with bounce */
+  .action-btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 active:scale-95 active:translate-y-0;
+  }
+
+  /* Modern input styling */
+  .input-modern {
+    @apply bg-input/50 border-border/50 rounded-xl transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-background;
   }
 }
